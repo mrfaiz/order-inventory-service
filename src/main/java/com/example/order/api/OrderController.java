@@ -30,11 +30,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public OrderResponse get(@PathVariable UUID orderId){
-        System.out.println(orderId);
-        var d = orderRepository.findAll();
-        System.out.println(d.size());
-        System.out.println(d.getFirst().getLines().size());
-        var order = orderRepository.findByIdWithLines(orderId)
+         var order = orderRepository.findByIdWithLines(orderId)
                 .orElseThrow(() -> new IllegalArgumentException(("Order not found")));
         var lines = order.getLines().stream()
                 .map(l -> new OrderLineResponse(
@@ -51,5 +47,25 @@ public class OrderController {
                 order.getCreatedAt(),
                 lines
         );
+    }
+
+    @GetMapping
+    public List<OrderResponse> list() {
+        return orderRepository.findAll().stream()
+                .map(o -> new OrderResponse(
+                        o.getId(),
+                        o.getStatus().name(),
+                        o.getCreatedAt(),
+                        o.getLines().stream()
+                                .map(d ->
+                                        new OrderLineResponse(
+                                                d.getId(),
+                                                d.getProduct().getSku(),
+                                                d.getProduct().getName(),
+                                                d.getQuantity(),
+                                                d.getUnitPriceCents()
+                                        )
+                                ).toList()))
+                .toList();
     }
 }

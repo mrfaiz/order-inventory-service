@@ -1,11 +1,13 @@
 package com.example.inventory.api;
 
+import com.example.inventory.domain.InventoryItem;
 import com.example.inventory.repository.InventoryItemRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +23,11 @@ public class InventoryController {
         var item = repository.findByProduct_Id(productId)
                 .orElseThrow(()-> new IllegalArgumentException("Inventor not found"));
         return  new InventorResponse(item.getId(), item.getQuantity());
+    }
+
+    @GetMapping()
+    public List<InventoryItem> list(){
+        return repository.findAll();
     }
 
 }
