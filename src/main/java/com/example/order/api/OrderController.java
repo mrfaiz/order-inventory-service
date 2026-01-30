@@ -68,4 +68,10 @@ public class OrderController {
                                 ).toList()))
                 .toList();
     }
+
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable UUID orderId){
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.noContent().build();
+    }
 }

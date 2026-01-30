@@ -16,7 +16,6 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         select i from InventoryItem i
-        join fetch i.product
         where i.product.id = :productId
     """)
     Optional<InventoryItem> findByProductIdForUpdate(@Param("productId") UUID productId);

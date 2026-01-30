@@ -2,6 +2,7 @@ package com.example.order.domain;
 
 
 import com.example.inventory.domain.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -12,6 +13,7 @@ public class OrderLine {
     @Id
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
             name = "order_id",

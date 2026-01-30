@@ -62,8 +62,9 @@ public class Order {
     }
 
     public void cancel(){
-        if(this.status == OrderStatus.CANCELLED){
-            return;
+        if(this.status == OrderStatus.CANCELLED) return; //Idempotent
+        if(this.status != OrderStatus.CREATED){
+            throw new IllegalArgumentException("Only created orders can be cancel");
         }
         this.status = OrderStatus.CANCELLED;
     }

@@ -5,6 +5,7 @@ import com.example.inventory.repository.InventoryItemRepository;
 import com.example.order.api.PlaceOrderRequest;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderLine;
+import com.example.order.domain.OrderStatus;
 import com.example.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.NonNull;
@@ -45,5 +46,24 @@ public class OrderService {
         }
         orderRepository.save(order);
         return order.getId();
+    }
+
+    @Transactional
+    public  void cancelOrder(UUID orderId){
+        Order order = orderRepository.findByIdWithLines(orderId)
+                .orElseThrow(()-> new IllegalArgumentException("Order not found"));
+
+        if(order.getStatus() == OrderStatus.CANCELLED) return;
+
+        for(var line: order.getLines()){
+            UUID productId = line.getProduct().getId();
+
+            InventoryItem inventoryItem = inventoryItemRepository.findByProductIdForUpdate(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("Inventory not found"));
+            inventoryItem.add(line.getQuantity());
+        }
+        order.cancel();
+        orderRepository.save(order);
+
     }
 }
