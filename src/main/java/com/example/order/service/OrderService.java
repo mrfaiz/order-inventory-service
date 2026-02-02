@@ -1,6 +1,7 @@
 package com.example.order.service;
 
 import com.example.inventory.domain.InventoryItem;
+import com.example.inventory.domain.Product;
 import com.example.inventory.repository.InventoryItemRepository;
 import com.example.order.api.PlaceOrderRequest;
 import com.example.order.domain.Order;
@@ -9,6 +10,7 @@ import com.example.order.domain.OrderStatus;
 import com.example.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -25,16 +27,35 @@ public class OrderService {
     }
 
     @Transactional
-    public UUID placeOrder(@NonNull PlaceOrderRequest request){
-        Order order =  new Order(UUID.randomUUID(), Instant.now());
-        for(var lineReq: request.lines()){
-            InventoryItem inventoryItem = inventoryItemRepository
+    public UUID placeOrder(PlaceOrderRequest request, String idempotencyKey) {
+
+        if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+            var existing = orderRepository.findByIdempotencyKey(idempotencyKey);
+            if (existing.isPresent()) {
+                return existing.get().getId();
+            }
+        }
+
+        Order order = new Order(
+                UUID.randomUUID(),
+                Instant.now(),
+                idempotencyKey
+        );
+        System.out.println(order.getIdempotencyKey());
+        for (var lineReq : request.lines()) {
+
+            InventoryItem inventory = inventoryItemRepository
                     .findByProductIdForUpdate(lineReq.productId())
-                    .orElseThrow(()-> new IllegalArgumentException("Product not found"));
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Inventory not found for productId=" + lineReq.productId()
+                            )
+                    );
 
-            inventoryItem.deduct(lineReq.quantity());
+            inventory.deduct(lineReq.quantity());
 
-            var product = inventoryItem.getProduct();
+            Product product = inventory.getProduct();
+
             OrderLine line = new OrderLine(
                     UUID.randomUUID(),
                     order,
@@ -43,10 +64,24 @@ public class OrderService {
                     product.getPriceCents()
             );
 
+            // OrderLine constructor already does:
+            // order.addLine(this)
         }
-        orderRepository.save(order);
-        return order.getId();
+
+        try {
+            orderRepository.save(order);
+            return order.getId();
+        } catch (DataIntegrityViolationException ex) {
+            // 5️⃣ Race condition handling for same idempotency key
+            if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+                return orderRepository.findByIdempotencyKey(idempotencyKey)
+                        .map(Order::getId)
+                        .orElseThrow(() -> ex);
+            }
+            throw ex;
+        }
     }
+
 
     @Transactional
     public  void cancelOrder(UUID orderId){

@@ -5,6 +5,7 @@ import com.example.inventory.api.ProductResponse;
 import com.example.inventory.domain.Product;
 import com.example.order.api.OrderLineRequest;
 import com.example.order.api.OrderResponse;
+import com.example.order.api.OrderSummaryResponse;
 import com.example.order.api.PlaceOrderRequest;
 import com.example.inventory.repository.InventoryItemRepository;
 import com.example.order.domain.Order;
@@ -78,8 +79,9 @@ class OrderControllerIT {
                 .orElseThrow(() -> new IllegalStateException("Seed inventory missing for productId=" + productId))
                 .getQuantity();
 
+        String key = UUID.randomUUID().toString();
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2))
+                List.of(new OrderLineRequest(productId, 2 )), key
         );
 
         String responseBody = mockMvc.perform(post("/orders")
@@ -106,7 +108,7 @@ class OrderControllerIT {
         UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2))
+                List.of(new OrderLineRequest(productId, 2)),UUID.randomUUID().toString()
         );
        String res = mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,5 +127,66 @@ class OrderControllerIT {
         });
         assertEquals(productId, response.lines().getFirst().productId());
 
+    }
+
+    @Test
+    void orderSummary() throws Exception{
+        UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+        PlaceOrderRequest req = new PlaceOrderRequest(
+                List.of(new OrderLineRequest(productId, 2)),UUID.randomUUID().toString()
+        );
+        String res = mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.isEmptyOrNullString())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        UUID id = UUID.fromString(res.replace("\"", ""));
+        var result = mockMvc.perform(get("/orders/summary"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String json = result.getResponse().getContentAsString();
+        OrderSummaryResponse[] response = objectMapper.readValue(json, new TypeReference<>() {});
+        assertEquals(1, response.length);
+        assertEquals(id, response[0].id());
+        assertEquals(1,response[0].lineCount());
+
+    }
+
+    @Test
+    void placeOrder_idempotency() throws Exception{
+        UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+        String id = UUID.randomUUID().toString();
+        PlaceOrderRequest req = new PlaceOrderRequest(
+                List.of(new OrderLineRequest(productId, 2)), id
+        );
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Idempotency-Key",id)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.isEmptyOrNullString())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        var before = inventoryRepo.findByProduct_Id(productId).orElseThrow();
+         assertEquals(48, before.getQuantity());
+
+        mockMvc.perform(post("/orders")
+                        .header("Idempotency-Key",id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.isEmptyOrNullString())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        var after = inventoryRepo.findByProduct_Id(productId).orElseThrow();
+        assertEquals(48, after.getQuantity());
     }
 }

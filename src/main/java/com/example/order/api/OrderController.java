@@ -22,10 +22,12 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<UUID> placeOrder(@RequestBody @Valid PlaceOrderRequest request)
-    {
-        UUID orderId = orderService.placeOrder(request);
-        return  ResponseEntity.ok(orderId);
+    public ResponseEntity<UUID> placeOrder(
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestBody @Valid PlaceOrderRequest request
+    ) {
+        UUID orderId = orderService.placeOrder(request, idempotencyKey);
+        return ResponseEntity.ok(orderId);
     }
 
     @GetMapping("/{orderId}")
@@ -73,5 +75,17 @@ public class OrderController {
     public ResponseEntity<Void> cancel(@PathVariable UUID orderId){
         orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/summary")
+    public List<OrderSummaryResponse> listAll(){
+        return orderRepository.findOrderSummariesRaw().stream()
+                .map(r -> new OrderSummaryResponse(
+                        (UUID) r[0],
+                        r[1].toString(),
+                        (java.time.Instant) r[2],
+                        ((Long) r[3]).intValue()
+                ))
+                .toList();
+
     }
 }

@@ -16,6 +16,8 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
+    @Column(name = "idempotency_key", length = 64, updatable = false)
+    private String idempotencyKey;
 
     @OneToMany(
             mappedBy = "order",
@@ -29,12 +31,13 @@ public class Order {
 
     protected Order(){}
 
-    public Order(UUID id,  Instant createdAt) {
+    public Order(UUID id,  Instant createdAt, String idempotencyKey) {
         if(id==null){
             throw new IllegalArgumentException("Order id must not be null");
         }
         this.id = id;
         this.status = OrderStatus.CREATED;
+        this.idempotencyKey = idempotencyKey;
         this.createdAt = createdAt != null?createdAt: Instant.now();
     }
 
@@ -67,5 +70,9 @@ public class Order {
             throw new IllegalArgumentException("Only created orders can be cancel");
         }
         this.status = OrderStatus.CANCELLED;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 }

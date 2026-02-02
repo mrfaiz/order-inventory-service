@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
-public record PlaceOrderRequest(@NotEmpty List<OrderLineRequest> lines) {
+public record PlaceOrderRequest(@NotEmpty List<OrderLineRequest> lines, String key) {
 }
