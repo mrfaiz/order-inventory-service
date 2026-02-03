@@ -81,7 +81,7 @@ class OrderControllerIT {
 
         String key = UUID.randomUUID().toString();
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2 )), key
+                List.of(new OrderLineRequest(productId, 2 ))
         );
 
         String responseBody = mockMvc.perform(post("/orders")
@@ -108,7 +108,7 @@ class OrderControllerIT {
         UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2)),UUID.randomUUID().toString()
+                List.of(new OrderLineRequest(productId, 2))
         );
        String res = mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +134,7 @@ class OrderControllerIT {
         UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2)),UUID.randomUUID().toString()
+                List.of(new OrderLineRequest(productId, 2))
         );
         String res = mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +162,7 @@ class OrderControllerIT {
 
         String id = UUID.randomUUID().toString();
         PlaceOrderRequest req = new PlaceOrderRequest(
-                List.of(new OrderLineRequest(productId, 2)), id
+                List.of(new OrderLineRequest(productId, 2))
         );
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)

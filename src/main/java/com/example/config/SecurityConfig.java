@@ -19,6 +19,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/orders").permitAll()
                         .requestMatchers("/orders/**").permitAll()
                         .requestMatchers("/products").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

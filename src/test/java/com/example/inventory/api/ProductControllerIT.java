@@ -88,9 +88,9 @@ public class ProductControllerIT {
         assertEquals(3,products.size());
         UUID uuid= UUID.randomUUID();
         AddProductRequest req = new AddProductRequest(
-                List.of(new ProductResponse(uuid, "sku"+uuid, "test", 100))
+                List.of(new AddProductItemRequest(uuid, "sku"+uuid, "test", 100))
         );
-        mockMvc.perform(post("/products/add")
+        mockMvc.perform(post("/products")
                         .with(user("user").password("pass123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -114,7 +114,7 @@ public class ProductControllerIT {
         assertEquals("Apple", p.getName());
 
         AddProductRequest req = new AddProductRequest(List.of(
-                new ProductResponse(id, "NEW-SKU", "New Name", 4000)
+                new AddProductItemRequest(id, "NEW-SKU", "New Name", 4000)
         ));
 
         mockMvc.perform(put("/products").with(user("user").password("pass123"))

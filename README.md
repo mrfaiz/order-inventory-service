@@ -184,3 +184,16 @@ curl -X POST http://localhost:8080/orders/<ORDER_ID>/cancel
 curl http://localhost:8080/inventory/11111111-1111-1111-1111-111111111111
 ```
 
+## 📘 API Documentation (Swagger / OpenAPI)
+
+This service exposes OpenAPI documentation and a Swagger UI page.
+
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- OpenAPI YAML: `http://localhost:8080/v3/api-docs.yaml`
+
+### Notes (Spring Security)
+If Spring Security is enabled, make sure these endpoints are publicly accessible:
+- `/v3/api-docs/**`
+- `/swagger-ui/**`
+- `/swagger-ui.html`

@@ -56,7 +56,7 @@ public class OrderService {
 
             Product product = inventory.getProduct();
 
-            OrderLine line = new OrderLine(
+           new OrderLine(
                     UUID.randomUUID(),
                     order,
                     product,

@@ -60,7 +60,7 @@ public class InventoryControllerIT {
         MvcResult result = mockMvc.perform(get("/inventory/{productId}", id).with(user("user").password("pass123")))
                 .andReturn();
         String json = result.getResponse().getContentAsString();
-        InventorResponse response = objectMapper.readValue(json, new TypeReference<InventorResponse>() {
+        InventoryResponse response = objectMapper.readValue(json, new TypeReference<InventoryResponse>() {
         });
         assertEquals(50, response.quantity());
     }

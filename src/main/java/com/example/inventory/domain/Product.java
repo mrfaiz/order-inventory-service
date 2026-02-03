@@ -20,6 +20,7 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
+
     private long priceCents;
 
     @Column(nullable = false)
