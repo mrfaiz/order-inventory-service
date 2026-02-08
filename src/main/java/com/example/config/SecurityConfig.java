@@ -19,7 +19,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // important for POST without browser CSRF token
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/orders").permitAll()
                         .requestMatchers("/orders/**").permitAll()
                         .requestMatchers("/products").permitAll()

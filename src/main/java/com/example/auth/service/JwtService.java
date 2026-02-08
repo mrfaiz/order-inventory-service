@@ -1,4 +1,4 @@
-package com.example.inventory.service;
+package com.example.auth.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -8,7 +8,8 @@ import java.util.Date;
 
 @Component
 public class JwtService {
-    private static final String SECRET = "very-secret-demo-key-change-me";
+    private static final String SECRET =
+            "change-me-to-a-long-32+chars-demo-secret-key-123456";
     private static final long EXPIRATION = 3600_000; // 1h
 
     public String generateToken(String username) {

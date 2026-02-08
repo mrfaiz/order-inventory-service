@@ -1,6 +1,6 @@
 package com.example.security;
 
-import com.example.inventory.service.JwtService;
+import com.example.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -2,7 +2,7 @@ package com.example.auth.api;
 
 import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.TokenResponse;
-import com.example.inventory.service.JwtService;
+import com.example.auth.service.JwtService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
