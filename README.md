@@ -141,12 +141,43 @@ On startup, Flyway automatically applies all database migrations (schema + seed 
 mvn test
 ```
 
-### API Examples
+## 🔐 Authentication & Authorization (JWT)
+This service uses stateless JWT-based authentication implemented with Spring Security.
+
+After authentication, clients must include a valid JWT in the Authorization header when calling secured endpoints.
+#### Login
+```bash
+POST /auth/login
+```
+Request body
+```bash
+{
+  "username": "admin",
+  "password": "password"
+}
+```
+Response
+```bash
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+#### Health
+```bash
+curl http://localhost:8080/health \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+```
+
+### API Examples (Intentionally skipped authentication :)) 
+
 
 #### List products
 ```bash
 curl http://localhost:8080/products
 ```
+
+
 
 #### Get inventory for a product
 ```bash
